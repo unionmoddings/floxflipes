@@ -1,0 +1,1668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Floxflips - Fake Casino Simulator</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+    :root {
+      --bg: #0b1421;
+      --card-bg: #15243a;
+      --accent: #ffb800;
+      --accent-dark: #cc9a00;
+      --text-light: #e3eafc;
+      --text-muted: #7b8bab;
+      --danger: #ff5f5f;
+      --success: #6de88e;
+      --chat-bg: #1d2a4c;
+      --horse-1: #FF5252;
+      --horse-2: #4CAF50;
+      --horse-3: #2196F3;
+      --horse-4: #FFC107;
+      --horse-5: #9C27B0;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    body, html {
+      margin: 0; padding: 0;
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text-light);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    #app {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+    /* Login Screen */
+    #login-screen {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #0c1832, #07101f);
+    }
+    #login-box {
+      background: var(--card-bg);
+      padding: 32px 28px;
+      border-radius: 14px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+      width: 320px;
+    }
+    #login-box h2 {
+      margin-top: 0;
+      margin-bottom: 24px;
+      font-weight: 700;
+      text-align: center;
+      letter-spacing: 1px;
+    }
+    #login-box label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 6px;
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+    #login-box input {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: none;
+      margin-bottom: 16px;
+      font-size: 16px;
+      background: #1c2a49;
+      color: var(--text-light);
+      outline: none;
+      transition: background 0.3s;
+    }
+    #login-box input:focus {
+      background: #2a3a6f;
+    }
+    #login-box button {
+      width: 100%;
+      padding: 12px 0;
+      border: none;
+      border-radius: 10px;
+      background: var(--accent);
+      font-weight: 700;
+      font-size: 16px;
+      cursor: pointer;
+      color: #000;
+      transition: background 0.3s;
+    }
+    #login-box button:hover {
+      background: var(--accent-dark);
+    }
+    #login-toggle {
+      text-align: center;
+      margin-top: 12px;
+      font-size: 14px;
+      color: var(--text-muted);
+      cursor: pointer;
+      user-select: none;
+    }
+    #login-toggle:hover {
+      color: var(--accent);
+    }
+    /* Main Screen */
+    #main-screen {
+      flex: 1;
+      display: none;
+      flex-direction: column;
+      background: linear-gradient(180deg, #07101f, #0c1832);
+    }
+    #header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 24px;
+      background: var(--card-bg);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.8);
+    }
+    #header h1 {
+      margin: 0;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: var(--accent);
+      user-select: none;
+    }
+    #balance {
+      font-weight: 700;
+      font-size: 18px;
+      background: #1f325a;
+      padding: 8px 14px;
+      border-radius: 14px;
+      color: var(--success);
+      user-select: none;
+      min-width: 110px;
+      text-align: center;
+    }
+    #logout-btn {
+      background: var(--danger);
+      border: none;
+      padding: 8px 14px;
+      font-weight: 700;
+      color: #fff;
+      border-radius: 14px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    #logout-btn:hover {
+      background: #cc5151;
+    }
+    #content {
+      flex: 1;
+      display: flex;
+      gap: 14px;
+      padding: 16px 24px;
+      overflow: hidden;
+    }
+    /* Left Panel - Games List */
+    #games-list {
+      width: 180px;
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 16px 0;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.6);
+      user-select: none;
+    }
+    #games-list h2 {
+      color: var(--accent);
+      font-weight: 700;
+      margin: 0 0 16px 0;
+      text-align: center;
+      user-select: none;
+      padding: 0 16px;
+    }
+    .game-tab {
+      padding: 12px 16px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .game-tab:hover {
+      background: #1d2a4c;
+    }
+    .game-tab.active {
+      background: var(--accent);
+      color: #000;
+      font-weight: 700;
+    }
+    /* Game Panel */
+    #game-panel {
+      flex: 1;
+      background: var(--card-bg);
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      padding: 18px 20px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.6);
+      overflow-y: auto;
+      user-select: none;
+    }
+    /* Games styles */
+    .game {
+      display: none;
+    }
+    .game.active {
+      display: block;
+    }
+    /* --- Coinflip --- */
+    #coinflip .choice-btns {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      margin-top: 12px;
+    }
+    #coinflip .choice-btn {
+      flex: 1;
+      padding: 14px 0;
+      font-weight: 700;
+      font-size: 18px;
+      color: var(--text-light);
+      background: var(--accent);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.3s;
+      user-select: none;
+    }
+    #coinflip .choice-btn:hover:not(:disabled) {
+      background: var(--accent-dark);
+    }
+    #coinflip .choice-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    #coinflip input[type=number] {
+      width: 100%;
+      padding: 8px 12px;
+      margin-top: 10px;
+      border-radius: 8px;
+      border: none;
+      font-size: 16px;
+      background: #15243a;
+      color: var(--text-light);
+      outline: none;
+      box-sizing: border-box;
+    }
+    #coinflip #coinflip-msg {
+      margin-top: 12px;
+      font-weight: 600;
+      min-height: 24px;
+      text-align: center;
+      user-select: none;
+    }
+    /* --- Mines --- */
+    #mines .controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    #mines label {
+      font-weight: 600;
+      user-select: none;
+    }
+    #mines input[type=number] {
+      width: 100px;
+      padding: 6px 10px;
+      border-radius: 8px;
+      border: none;
+      font-size: 16px;
+      background: #15243a;
+      color: var(--text-light);
+      outline: none;
+      text-align: center;
+    }
+    #mines #mines-msg {
+      font-weight: 700;
+      margin-top: 8px;
+      min-height: 24px;
+      text-align: center;
+      user-select: none;
+    }
+    #mines #mines-board {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      user-select: none;
+      justify-content: center;
+      margin: 16px 0;
+    }
+    .mine-cell {
+      width: 40px;
+      height: 40px;
+      background: #223457;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 18px;
+      color: var(--accent);
+      transition: background 0.3s, color 0.3s;
+      user-select: none;
+    }
+    .mine-cell.revealed {
+      background: #4a6b8c;
+      cursor: default;
+      color: var(--text-light);
+    }
+    .mine-cell.mine {
+      background: var(--danger);
+      color: #fff;
+    }
+    .mine-cell.safe {
+      background: var(--success);
+      color: #000;
+    }
+    #mines-cashout-btn {
+      width: 100%;
+      padding: 12px 0;
+      border: none;
+      border-radius: 10px;
+      background: var(--success);
+      font-weight: 700;
+      font-size: 16px;
+      cursor: pointer;
+      color: #000;
+      transition: background 0.3s;
+      margin-top: 8px;
+    }
+    #mines-cashout-btn:hover:not(:disabled) {
+      background: #5bd47a;
+    }
+    #mines-cashout-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    /* --- Horse Betting --- */
+    #horses .controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    #horses label {
+      font-weight: 600;
+      user-select: none;
+    }
+    #horses input[type=number] {
+      width: 100px;
+      padding: 6px 10px;
+      border-radius: 8px;
+      border: none;
+      font-size: 16px;
+      background: #15243a;
+      color: var(--text-light);
+      outline: none;
+      text-align: center;
+    }
+    #horses #horses-msg {
+      font-weight: 700;
+      margin: 16px 0;
+      min-height: 24px;
+      text-align: center;
+      user-select: none;
+    }
+    #horses-track {
+      position: relative;
+      height: 200px;
+      background: #1d2a4c;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+    .horse {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      color: white;
+      transition: left 0.1s linear;
+      z-index: 2;
+    }
+    .horse::after {
+      content: '';
+      position: absolute;
+      width: 60px;
+      height: 4px;
+      background: inherit;
+      left: -10px;
+      bottom: -10px;
+      opacity: 0.7;
+    }
+    .horse-1 { background: var(--horse-1); }
+    .horse-2 { background: var(--horse-2); }
+    .horse-3 { background: var(--horse-3); }
+    .horse-4 { background: var(--horse-4); }
+    .horse-5 { background: var(--horse-5); }
+    .horse-finish-line {
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: var(--accent);
+      z-index: 1;
+    }
+    .horse-bet-btn {
+      flex: 1;
+      padding: 10px 0;
+      border: none;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 16px;
+      cursor: pointer;
+      color: white;
+      transition: transform 0.2s, opacity 0.3s;
+    }
+    .horse-bet-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+    }
+    .horse-bet-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    #horses-bet-btns {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    /* --- Wheel Spin --- */
+    #wheel .controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    #wheel label {
+      font-weight: 600;
+      user-select: none;
+    }
+    #wheel input[type=number] {
+      width: 100px;
+      padding: 6px 10px;
+      border-radius: 8px;
+      border: none;
+      font-size: 16px;
+      background: #15243a;
+      color: var(--text-light);
+      outline: none;
+      text-align: center;
+    }
+    #wheel #wheel-msg {
+      font-weight: 700;
+      margin: 16px 0;
+      min-height: 24px;
+      text-align: center;
+      user-select: none;
+    }
+    #wheel-container {
+      position: relative;
+      width: 300px;
+      height: 300px;
+      margin: 0 auto;
+    }
+    #wheel-spinner {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      position: relative;
+      overflow: hidden;
+      border: 8px solid #223457;
+      transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+      transform: rotate(0deg);
+    }
+    .wheel-section {
+      position: absolute;
+      width: 50%;
+      height: 50%;
+      transform-origin: bottom right;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      color: white;
+    }
+    .wheel-section:nth-child(1) { 
+      background: #FF5252; 
+      transform: rotate(0deg) skewY(30deg);
+    }
+    .wheel-section:nth-child(2) { 
+      background: #4CAF50; 
+      transform: rotate(60deg) skewY(30deg);
+    }
+    .wheel-section:nth-child(3) { 
+      background: #2196F3; 
+      transform: rotate(120deg) skewY(30deg);
+    }
+    .wheel-section:nth-child(4) { 
+      background: #FFC107; 
+      transform: rotate(180deg) skewY(30deg);
+    }
+    .wheel-section:nth-child(5) { 
+      background: #9C27B0; 
+      transform: rotate(240deg) skewY(30deg);
+    }
+    .wheel-section:nth-child(6) { 
+      background: #FF9800; 
+      transform: rotate(300deg) skewY(30deg);
+    }
+    .wheel-section-value {
+      transform: skewY(-30deg) rotate(15deg);
+      font-size: 24px;
+    }
+    #wheel-pointer {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 30px;
+      height: 30px;
+      background: var(--accent);
+      clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+      z-index: 10;
+    }
+    #wheel-spin-btn {
+      width: 100%;
+      padding: 12px 0;
+      border: none;
+      border-radius: 10px;
+      background: var(--accent);
+      font-weight: 700;
+      font-size: 16px;
+      cursor: pointer;
+      color: #000;
+      transition: background 0.3s;
+      margin-top: 16px;
+    }
+    #wheel-spin-btn:hover:not(:disabled) {
+      background: var(--accent-dark);
+    }
+    #wheel-spin-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    /* Right Panel */
+    #right-panel {
+      width: 350px;
+      background: var(--card-bg);
+      border-radius: 16px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.6);
+      display: flex;
+      flex-direction: column;
+      user-select: none;
+    }
+    /* Activity Feed */
+    #activity-feed {
+      flex: 0 0 auto;
+      padding: 16px 20px;
+      overflow-y: auto;
+      border-bottom: 1px solid #223350;
+      height: 200px;
+      min-height: 200px;
+      max-height: 200px;
+    }
+    #activity-feed h3 {
+      margin: 0 0 8px 0;
+      font-weight: 700;
+      color: var(--accent);
+      user-select: none;
+    }
+    #feed-list {
+      list-style: none;
+      margin: 0; padding: 0;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    #feed-list li {
+      margin-bottom: 8px;
+      line-height: 1.25em;
+      user-select: none;
+    }
+    #feed-list li.win {
+      color: var(--success);
+      font-weight: 600;
+    }
+    #feed-list li.lose {
+      color: var(--danger);
+      font-weight: 600;
+    }
+    /* Chat */
+    #chat {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+    #chat h3 {
+      margin: 8px 0 6px 0;
+      font-weight: 700;
+      color: var(--accent);
+      user-select: none;
+      padding-left: 16px;
+    }
+    #chat-messages {
+      flex: 1;
+      padding: 12px 16px;
+      overflow-y: auto;
+      background: var(--chat-bg);
+      border-radius: 0 0 16px 16px;
+      font-size: 14px;
+      min-height: 0;
+    }
+    .chat-message {
+      margin-bottom: 10px;
+      line-height: 1.3;
+      user-select: text;
+    }
+    .chat-message strong {
+      color: var(--accent);
+      user-select: text;
+    }
+    #chat-form {
+      display: flex;
+      border-top: 1px solid #223350;
+      background: var(--card-bg);
+      border-radius: 0 0 16px 16px;
+    }
+    #chat-input {
+      flex: 1;
+      border: none;
+      background: transparent;
+      padding: 14px 16px;
+      color: var(--text-light);
+      font-size: 14px;
+      outline: none;
+      border-radius: 0 0 0 16px;
+    }
+    #chat-send-btn {
+      background: var(--accent);
+      border: none;
+      color: #000;
+      padding: 0 24px;
+      font-weight: 700;
+      cursor: pointer;
+      border-radius: 0 0 16px 0;
+      transition: background 0.3s;
+    }
+    #chat-send-btn:hover:not(:disabled) {
+      background: var(--accent-dark);
+    }
+    #chat-send-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    /* Popup */
+    #popup {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: var(--accent);
+      color: #000;
+      font-weight: 700;
+      padding: 16px 24px;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      opacity: 0;
+      pointer-events: none;
+      user-select: none;
+      transform: translateX(100%);
+      transition:
+        opacity 0.5s ease,
+        transform 0.5s ease;
+      z-index: 9999;
+    }
+    #popup.show {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateX(0);
+    }
+    /* Scrollbar */
+    #activity-feed::-webkit-scrollbar,
+    #chat-messages::-webkit-scrollbar,
+    #game-panel::-webkit-scrollbar {
+      width: 8px;
+    }
+    #activity-feed::-webkit-scrollbar-thumb,
+    #chat-messages::-webkit-scrollbar-thumb,
+    #game-panel::-webkit-scrollbar-thumb {
+      background: #304a85;
+      border-radius: 8px;
+    }
+    #activity-feed::-webkit-scrollbar-track,
+    #chat-messages::-webkit-scrollbar-track,
+    #game-panel::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    /* Responsive */
+    @media (max-width: 720px) {
+      #content {
+        flex-direction: column;
+        padding: 12px 14px;
+      }
+      #games-list {
+        width: 100%;
+        margin-bottom: 16px;
+      }
+      #right-panel {
+        width: 100%;
+        height: 360px;
+        margin-top: 16px;
+      }
+      #game-panel {
+        border-radius: 14px 14px 0 0;
+        max-height: 400px;
+      }
+      #activity-feed {
+        height: 180px;
+        min-height: 180px;
+        max-height: 180px;
+      }
+      #wheel-container {
+        width: 250px;
+        height: 250px;
+      }
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+
+  <!-- Login Screen -->
+  <section id="login-screen" aria-label="Login or signup screen">
+    <div id="login-box">
+      <h2 id="login-title">Log In</h2>
+      <label for="username-input">Username</label>
+      <input type="text" id="username-input" autocomplete="off" />
+      <label for="password-input">Password</label>
+      <input type="password" id="password-input" autocomplete="off" />
+      <button id="login-btn">Log In</button>
+      <div id="login-toggle">Don't have an account? <span id="toggle-link">Sign Up</span></div>
+    </div>
+  </section>
+
+  <!-- Main Screen -->
+  <section id="main-screen" aria-live="polite">
+    <header id="header">
+      <h1>Floxflips</h1>
+      <div id="balance" aria-label="User balance">R0</div>
+      <button id="logout-btn" aria-label="Logout">Log Out</button>
+    </header>
+    <main id="content" role="main">
+      <!-- Games List Sidebar -->
+      <aside id="games-list" aria-label="Games list">
+        <h2>Games</h2>
+        <div id="mines-tab" class="game-tab active" data-game="mines">Mines</div>
+        <div id="coinflip-tab" class="game-tab" data-game="coinflip">Coinflip</div>
+        <div id="horses-tab" class="game-tab" data-game="horses">Horse Betting</div>
+        <div id="wheel-tab" class="game-tab" data-game="wheel">Wheel Spin</div>
+      </aside>
+
+      <!-- Game Panel -->
+      <section id="game-panel" tabindex="0" aria-label="Game area">
+        <!-- Mines Game -->
+        <section id="mines" class="game active" aria-label="Mines game">
+          <h3>Mines</h3>
+          <div class="controls">
+            <label for="mines-bet">Bet:</label>
+            <input type="number" id="mines-bet" placeholder="Bet amount" min="1" step="1" aria-label="Mines bet amount" />
+            <label for="mines-mines-count">Mines:</label>
+            <input type="number" id="mines-mines-count" placeholder="Mines (1-5)" min="1" max="5" step="1" value="3" aria-label="Number of mines" />
+            <button id="mines-start-btn" aria-label="Start Mines Game">Start Game</button>
+          </div>
+          <div id="mines-msg" role="alert" aria-live="assertive"></div>
+          <div id="mines-board" aria-label="Mines game board" role="grid"></div>
+          <button id="mines-cashout-btn" disabled aria-label="Cash out">Cash Out</button>
+        </section>
+
+        <!-- Coinflip Game -->
+        <section id="coinflip" class="game" aria-label="Coinflip game">
+          <h3>Coinflip</h3>
+          <input type="number" id="coinflip-bet" placeholder="Bet amount" min="1" step="1" aria-label="Coinflip bet amount" />
+          <div class="choice-btns">
+            <button id="coinflip-heads" class="choice-btn" aria-label="Choose Heads">Heads</button>
+            <button id="coinflip-tails" class="choice-btn" aria-label="Choose Tails">Tails</button>
+          </div>
+          <div id="coinflip-msg" role="alert" aria-live="assertive"></div>
+        </section>
+
+        <!-- Horse Betting Game -->
+        <section id="horses" class="game" aria-label="Horse betting game">
+          <h3>Horse Betting</h3>
+          <div class="controls">
+            <label for="horses-bet">Bet:</label>
+            <input type="number" id="horses-bet" placeholder="Bet amount" min="1" step="1" aria-label="Horse bet amount" />
+            <label for="horses-horse">Horse:</label>
+            <select id="horses-horse" aria-label="Select horse">
+              <option value="1">Red (3x)</option>
+              <option value="2">Green (2.5x)</option>
+              <option value="3">Blue (2x)</option>
+              <option value="4">Yellow (4x)</option>
+              <option value="5">Purple (5x)</option>
+            </select>
+          </div>
+          <div id="horses-bet-btns">
+            <button class="horse-bet-btn" data-horse="1" style="background: var(--horse-1);">Bet on Red (3x)</button>
+            <button class="horse-bet-btn" data-horse="2" style="background: var(--horse-2);">Bet on Green (2.5x)</button>
+          </div>
+          <div id="horses-bet-btns">
+            <button class="horse-bet-btn" data-horse="3" style="background: var(--horse-3);">Bet on Blue (2x)</button>
+            <button class="horse-bet-btn" data-horse="4" style="background: var(--horse-4);">Bet on Yellow (4x)</button>
+          </div>
+          <button class="horse-bet-btn" data-horse="5" style="background: var(--horse-5);">Bet on Purple (5x)</button>
+          <div id="horses-track">
+            <div class="horse-finish-line"></div>
+            <div class="horse horse-1" data-num="1">1</div>
+            <div class="horse horse-2" data-num="2">2</div>
+            <div class="horse horse-3" data-num="3">3</div>
+            <div class="horse horse-4" data-num="4">4</div>
+            <div class="horse horse-5" data-num="5">5</div>
+          </div>
+          <div id="horses-msg" role="alert" aria-live="assertive"></div>
+        </section>
+
+        <!-- Wheel Spin Game -->
+        <section id="wheel" class="game" aria-label="Wheel spin game">
+          <h3>Wheel Spin</h3>
+          <div class="controls">
+            <label for="wheel-bet">Bet:</label>
+            <input type="number" id="wheel-bet" placeholder="Bet amount" min="1" step="1" aria-label="Wheel bet amount" />
+            <label for="wheel-segment">Segment:</label>
+            <select id="wheel-segment" aria-label="Select wheel segment">
+              <option value="1">Red (6x)</option>
+              <option value="2">Green (5x)</option>
+              <option value="3">Blue (4x)</option>
+              <option value="4">Yellow (3x)</option>
+              <option value="5">Purple (2x)</option>
+              <option value="6">Orange (8x)</option>
+            </select>
+          </div>
+          <div id="wheel-msg" role="alert" aria-live="assertive"></div>
+          <div id="wheel-container">
+            <div id="wheel-pointer"></div>
+            <div id="wheel-spinner">
+              <div class="wheel-section"><div class="wheel-section-value">6x</div></div>
+              <div class="wheel-section"><div class="wheel-section-value">5x</div></div>
+              <div class="wheel-section"><div class="wheel-section-value">4x</div></div>
+              <div class="wheel-section"><div class="wheel-section-value">3x</div></div>
+              <div class="wheel-section"><div class="wheel-section-value">2x</div></div>
+              <div class="wheel-section"><div class="wheel-section-value">8x</div></div>
+            </div>
+          </div>
+          <button id="wheel-spin-btn" aria-label="Spin wheel">Spin Wheel</button>
+        </section>
+      </section>
+
+      <aside id="right-panel" aria-label="Side panel">
+        <section id="activity-feed" aria-live="polite" aria-atomic="false">
+          <h3>Activity Feed</h3>
+          <ul id="feed-list" role="log" aria-live="polite" aria-relevant="additions"></ul>
+        </section>
+        <section id="chat" aria-live="polite" aria-atomic="false">
+          <h3>Chat</h3>
+          <div id="chat-messages" role="log" aria-live="polite" aria-relevant="additions"></div>
+          <form id="chat-form" aria-label="Send chat message">
+            <input id="chat-input" type="text" placeholder="Type a message..." autocomplete="off" aria-label="Chat message input" />
+            <button id="chat-send-btn" type="submit" disabled aria-label="Send chat message">Send</button>
+          </form>
+        </section>
+      </aside>
+    </main>
+  </section>
+
+</div>
+
+<!-- Popup -->
+<div id="popup" role="alert" aria-live="assertive"></div>
+
+<!-- Sounds -->
+<audio id="sound-win" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg" preload="auto"></audio>
+<audio id="sound-lose" src="https://actions.google.com/sounds/v1/cartoon/cartoon_boing.ogg" preload="auto"></audio>
+<audio id="sound-click" src="https://actions.google.com/sounds/v1/button/button_click.ogg" preload="auto"></audio>
+<audio id="sound-race" src="https://actions.google.com/sounds/v1/cartoon/slide_whistle_down.ogg" preload="auto"></audio>
+<audio id="sound-wheel" src="https://actions.google.com/sounds/v1/cartoon/cartoon_spin.ogg" preload="auto"></audio>
+
+<script>
+(() => {
+  // User, Login, Storage
+  let users = {};
+  let currentUser = null;
+  let loginMode = 'login';
+
+  const usernameInput = document.getElementById('username-input');
+  const passwordInput = document.getElementById('password-input');
+  const loginBtn = document.getElementById('login-btn');
+  const loginTitle = document.getElementById('login-title');
+  const loginToggle = document.getElementById('login-toggle');
+  const toggleLink = document.getElementById('toggle-link');
+  const loginScreen = document.getElementById('login-screen');
+  const mainScreen = document.getElementById('main-screen');
+  const balanceDisplay = document.getElementById('balance');
+  const logoutBtn = document.getElementById('logout-btn');
+  const popup = document.getElementById('popup');
+
+  // Activity Feed Elements
+  const feedList = document.getElementById('feed-list');
+  const fakeActivityUsers = ['jackson', 'mia', 'liam', 'olivia', 'ethan', 'sophia', 'noah', 'ava'];
+
+  // Chat Elements
+  const chatMessages = document.getElementById('chat-messages');
+  const chatForm = document.getElementById('chat-form');
+  const chatInput = document.getElementById('chat-input');
+  const chatSendBtn = document.getElementById('chat-send-btn');
+  const chatUsers = [
+    {name: 'jackson', color: '#d18f00'},
+    {name: 'mia', color: '#9a35ff'},
+    {name: 'liam', color: '#00b8d4'},
+    {name: 'olivia', color: '#ff5a88'},
+    {name: 'ethan', color: '#7fffd4'},
+    {name: 'sophia', color: '#ffd700'},
+    {name: 'noah', color: '#ff4500'},
+    {name: 'ava', color: '#40e0d0'}
+  ];
+  let chatMessageCount = 0;
+  const MAX_CHAT_MESSAGES = 200;
+
+  // Sounds
+  const soundWin = document.getElementById('sound-win');
+  const soundLose = document.getElementById('sound-lose');
+  const soundClick = document.getElementById('sound-click');
+  const soundRace = document.getElementById('sound-race');
+  const soundWheel = document.getElementById('sound-wheel');
+
+  // Game Tabs
+  const gameTabs = document.querySelectorAll('.game-tab');
+  const games = document.querySelectorAll('.game');
+
+  // Utils
+  function hashPwd(pwd) {
+    // Simple hash (not secure, for demo only)
+    let hash = 0;
+    for(let i=0; i<pwd.length; i++) {
+      hash = ((hash << 5) - hash) + pwd.charCodeAt(i);
+      hash |= 0;
+    }
+    return hash;
+  }
+  function saveUsers() {
+    localStorage.setItem('floxflips_users', JSON.stringify(users));
+  }
+  function loadUsers() {
+    try {
+      users = JSON.parse(localStorage.getItem('floxflips_users')) || {};
+    } catch {
+      users = {};
+    }
+  }
+  function saveSession() {
+    if(currentUser) {
+      localStorage.setItem('floxflips_currentUser', currentUser.username);
+    } else {
+      localStorage.removeItem('floxflips_currentUser');
+    }
+  }
+  function loadSession() {
+    const savedUser = localStorage.getItem('floxflips_currentUser');
+    if(savedUser && users[savedUser]) {
+      currentUser = users[savedUser];
+      updateBalance();
+    }
+  }
+  function updateBalance() {
+    balanceDisplay.textContent = `R${currentUser.balance.toLocaleString()}`;
+  }
+  function showPopup(msg, type='info') {
+    popup.textContent = msg;
+    popup.style.backgroundColor = {
+      'info': 'var(--accent)',
+      'success': 'var(--success)',
+      'error': 'var(--danger)'
+    }[type] || 'var(--accent)';
+    popup.classList.add('show');
+    clearTimeout(popup.timeout);
+    popup.timeout = setTimeout(() => popup.classList.remove('show'), 3500);
+  }
+  function showLoginScreen() {
+    loginScreen.style.display = 'flex';
+    mainScreen.style.display = 'none';
+  }
+  function showMainScreen() {
+    loginScreen.style.display = 'none';
+    mainScreen.style.display = 'flex';
+    updateBalance();
+    renderActivityFeedInit();
+    randomFeedLoop();
+    startFakeChatLoop();
+  }
+
+  // Validate inputs
+  function validateUsername(name) {
+    return /^[a-zA-Z0-9_-]{3,15}$/.test(name);
+  }
+  function validatePassword(pwd) {
+    return pwd.length >= 4;
+  }
+  function updateLoginButton() {
+    const usernameValid = validateUsername(usernameInput.value.trim());
+    const passwordValid = validatePassword(passwordInput.value);
+    loginBtn.disabled = !(usernameValid && passwordValid);
+  }
+  usernameInput.addEventListener('input', updateLoginButton);
+  passwordInput.addEventListener('input', updateLoginButton);
+
+  // Login/Signup toggle
+  toggleLink.addEventListener('click', () => {
+    if(loginMode === 'login') {
+      loginMode = 'signup';
+      loginTitle.textContent = 'Sign Up';
+      loginBtn.textContent = 'Sign Up';
+      toggleLink.textContent = 'Log In';
+      loginToggle.firstChild.textContent = "Already have an account? ";
+    } else {
+      loginMode = 'login';
+      loginTitle.textContent = 'Log In';
+      loginBtn.textContent = 'Log In';
+      toggleLink.textContent = 'Sign Up';
+      loginToggle.firstChild.textContent = "Don't have an account? ";
+    }
+    updateLoginButton();
+  });
+
+  // Login or Sign up
+  loginBtn.addEventListener('click', () => {
+    const username = usernameInput.value.trim();
+    const pwd = passwordInput.value;
+
+    if(!validateUsername(username)) {
+      showPopup('Invalid username (3-15 letters, numbers, _ or -)', 'error');
+      return;
+    }
+    if(!validatePassword(pwd)) {
+      showPopup('Password too short (min 4 chars)', 'error');
+      return;
+    }
+
+    if(loginMode === 'login') {
+      // Login
+      if(!users[username]) {
+        showPopup('No such user found', 'error');
+        return;
+      }
+      if(users[username].password !== hashPwd(pwd)) {
+        showPopup('Incorrect password', 'error');
+        return;
+      }
+      currentUser = users[username];
+      saveSession();
+      showMainScreen();
+      showPopup(`Welcome back, ${currentUser.username}!`, 'success');
+    } else {
+      // Signup
+      if(users[username]) {
+        showPopup('Username already taken', 'error');
+        return;
+      }
+      users[username] = {
+        username,
+        password: hashPwd(pwd),
+        balance: 100, // Starting with 100R
+      };
+      saveUsers();
+      currentUser = users[username];
+      saveSession();
+      showMainScreen();
+      showPopup(`Account created! Welcome, ${currentUser.username}`, 'success');
+    }
+  });
+
+  // Logout
+  logoutBtn.addEventListener('click', () => {
+    currentUser = null;
+    saveSession();
+    showLoginScreen();
+    showPopup('Logged out', 'info');
+  });
+
+  // Game Tab Switching
+  gameTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const gameId = tab.dataset.game;
+      
+      // Update active tab
+      gameTabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      
+      // Show selected game
+      games.forEach(game => game.classList.remove('active'));
+      document.getElementById(gameId).classList.add('active');
+    });
+  });
+
+  // Activity Feed (fake wins/losses)
+  let feedItems = [];
+  const winTexts = ['won', 'hit jackpot for', 'cashed out', 'scored', 'won big:'];
+  const loseTexts = ['lost', 'busted at', 'lost bet of', 'missed', 'lost big:'];
+
+  function getRandomInt(min,max) {
+    return Math.floor(Math.random()*(max-min+1)) + min;
+  }
+  function randomChoice(arr) {
+    return arr[Math.floor(Math.random()*arr.length)];
+  }
+  function addFeedItem(user, win, amount) {
+    const li = document.createElement('li');
+    li.classList.add(win ? 'win' : 'lose');
+    li.textContent = `${user} ${win ? randomChoice(winTexts) : randomChoice(loseTexts)} R${amount.toLocaleString()}`;
+    feedList.appendChild(li);
+    feedList.scrollTop = feedList.scrollHeight;
+    feedItems.push(li);
+    // Limit feed to 50 items max
+    if(feedItems.length > 50) {
+      let removed = feedItems.shift();
+      removed.remove();
+    }
+  }
+  // Generate random feed items every 1.5-3 seconds
+  function randomFeedLoop() {
+    if(!mainScreen.style.display || mainScreen.style.display==='none') return; // stop if not logged in
+    const user = randomChoice(fakeActivityUsers);
+    const win = Math.random() < 0.5;
+    const amount = getRandomInt(10, 5000);
+    addFeedItem(user, win, amount);
+    setTimeout(randomFeedLoop, getRandomInt(1500, 3000));
+  }
+  function renderActivityFeedInit() {
+    feedList.innerHTML = '';
+    feedItems = [];
+    // Add some initial feed items for style
+    for(let i=0; i<8; i++) {
+      const user = randomChoice(fakeActivityUsers);
+      const win = i % 2 === 0;
+      const amount = getRandomInt(10, 10000);
+      addFeedItem(user, win, amount);
+    }
+  }
+
+  // Chat system
+  function renderChatMessage({name, msg, system=false, color}) {
+    const div = document.createElement('div');
+    div.className = 'chat-message';
+    if(system) {
+      div.innerHTML = `<em>${msg}</em>`;
+    } else {
+      const userColor = color || varColorFromName(name);
+      div.innerHTML = `<strong style="color:${userColor}">${name}:</strong> ${escapeHtml(msg)}`;
+    }
+    chatMessages.appendChild(div);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+    
+    // Limit chat messages to prevent memory issues
+    chatMessageCount++;
+    if(chatMessageCount > MAX_CHAT_MESSAGES) {
+      chatMessages.removeChild(chatMessages.firstChild);
+      chatMessageCount--;
+    }
+  }
+  function escapeHtml(text) {
+    const p = document.createElement('p');
+    p.textContent = text;
+    return p.innerHTML;
+  }
+  function varColorFromName(name) {
+    let hash = 0;
+    for(let i=0; i<name.length; i++) {
+      hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const c = (hash & 0x00FFFFFF)
+      .toString(16)
+      .toUpperCase();
+    return "#" + "00000".substring(0, 6 - c.length) + c;
+  }
+
+  chatInput.addEventListener('input', () => {
+    chatSendBtn.disabled = chatInput.value.trim().length === 0;
+  });
+
+  chatForm.addEventListener('submit', e => {
+    e.preventDefault();
+    const message = chatInput.value.trim();
+    if(message.length === 0) return;
+    renderChatMessage({name: currentUser.username, msg: message});
+    chatInput.value = '';
+    chatSendBtn.disabled = true;
+    // Add fake random replies sometimes
+    if(Math.random() < 0.3) {
+      setTimeout(() => {
+        const bot = randomChoice(chatUsers);
+        const replies = [
+          "Nice!", "Good luck!", "GG", "No way!", "I'm on a hot streak!", "Anyone up for a game?", "Lol",
+          "Oof", "Yikes", "That was close!", "Let's gooo!"
+        ];
+        renderChatMessage({name: bot.name, msg: randomChoice(replies), color: bot.color});
+      }, getRandomInt(1500, 4000));
+    }
+  });
+
+  // Fake chat random messages loop
+  function startFakeChatLoop() {
+    if(!mainScreen.style.display || mainScreen.style.display==='none') return;
+    setTimeout(() => {
+      const bot = randomChoice(chatUsers);
+      const messages = [
+        "What's the best game here?", "Anyone hit a jackpot?", "I'm on a losing streak :(", 
+        "Just won big on Coinflip!", "Mines is my favorite!", "Floxflips is lit 🔥",
+        "GG everyone", "Let's gooo!", "This game is so fun!", "Bet big or go home!",
+        "Haha lost again!", "Who else is playing?", "Can't stop playing Floxflips!",
+        "Anyone up for a challenge?"
+      ];
+      renderChatMessage({name: bot.name, msg: randomChoice(messages), color: bot.color});
+      startFakeChatLoop();
+    }, getRandomInt(4000, 8000));
+  }
+
+  // --- Coinflip Game Logic ---
+  const coinflipBetInput = document.getElementById('coinflip-bet');
+  const coinflipHeadsBtn = document.getElementById('coinflip-heads');
+  const coinflipTailsBtn = document.getElementById('coinflip-tails');
+  const coinflipMsg = document.getElementById('coinflip-msg');
+
+  function disableCoinflipButtons(disabled) {
+    coinflipHeadsBtn.disabled = disabled;
+    coinflipTailsBtn.disabled = disabled;
+  }
+
+  function playSound(sound) {
+    if(sound && typeof sound.play === 'function') {
+      sound.currentTime = 0;
+      sound.play();
+    }
+  }
+
+  function coinflipPlay(choice) {
+    if(!currentUser) return;
+    const bet = parseInt(coinflipBetInput.value, 10);
+    if(isNaN(bet) || bet <= 0) {
+      showPopup('Enter a valid bet amount (greater than 0)', 'error');
+      return;
+    }
+    if(bet > currentUser.balance) {
+      showPopup('Insufficient balance', 'error');
+      return;
+    }
+    disableCoinflipButtons(true);
+    coinflipMsg.textContent = 'Flipping the coin...';
+    playSound(soundClick);
+    setTimeout(() => {
+      const flipResult = Math.random() < 0.5 ? 'heads' : 'tails';
+      let won = false;
+      if(choice === flipResult) {
+        won = true;
+        currentUser.balance += bet;
+        playSound(soundWin);
+      } else {
+        currentUser.balance -= bet;
+        playSound(soundLose);
+      }
+      updateBalance();
+      saveUsers();
+      coinflipMsg.textContent = `The coin landed on ${flipResult.toUpperCase()}. You ${won ? 'won' : 'lost'} R${bet.toLocaleString()}`;
+      addFeedItem(currentUser.username, won, bet);
+      disableCoinflipButtons(false);
+    }, 2000);
+  }
+
+  coinflipHeadsBtn.addEventListener('click', () => coinflipPlay('heads'));
+  coinflipTailsBtn.addEventListener('click', () => coinflipPlay('tails'));
+
+  // --- Mines Game Logic ---
+  const minesBetInput = document.getElementById('mines-bet');
+  const minesMinesCountInput = document.getElementById('mines-mines-count');
+  const minesStartBtn = document.getElementById('mines-start-btn');
+  const minesCashoutBtn = document.getElementById('mines-cashout-btn');
+  const minesBoard = document.getElementById('mines-board');
+  const minesMsg = document.getElementById('mines-msg');
+
+  const MINES_GRID_SIZE = 5;
+  let minesGameActive = false;
+  let minesBet = 0;
+  let minesCount = 3;
+  let minesPositions = [];
+  let revealedCells = new Set();
+  let minesPayoutMultiplier = 1;
+
+  function resetMinesGame() {
+    minesBoard.innerHTML = '';
+    minesMsg.textContent = '';
+    revealedCells.clear();
+    minesPositions = [];
+    minesGameActive = false;
+    minesPayoutMultiplier = 1;
+    minesCashoutBtn.disabled = true;
+  }
+
+  function generateMines() {
+    minesPositions = [];
+    while(minesPositions.length < minesCount) {
+      const pos = getRandomInt(0, MINES_GRID_SIZE*MINES_GRID_SIZE - 1);
+      if(!minesPositions.includes(pos)) minesPositions.push(pos);
+    }
+  }
+
+  function updateMinesMsg(text, color) {
+    minesMsg.textContent = text;
+    minesMsg.style.color = color || 'inherit';
+  }
+
+  function createMinesBoard() {
+    minesBoard.style.gridTemplateColumns = `repeat(${MINES_GRID_SIZE}, 40px)`;
+    for(let i=0; i<MINES_GRID_SIZE*MINES_GRID_SIZE; i++) {
+      const cell = document.createElement('div');
+      cell.classList.add('mine-cell');
+      cell.dataset.index = i;
+      cell.tabIndex = 0;
+      cell.setAttribute('role', 'button');
+      cell.setAttribute('aria-pressed', 'false');
+      cell.addEventListener('click', onMineCellClick);
+      cell.addEventListener('keydown', e => {
+        if(e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onMineCellClick(e);
+        }
+      });
+      minesBoard.appendChild(cell);
+    }
+  }
+
+  function onMineCellClick(e) {
+    if(!minesGameActive) return;
+    const cell = e.currentTarget;
+    const idx = Number(cell.dataset.index);
+    if(revealedCells.has(idx)) return;
+
+    revealedCells.add(idx);
+
+    if(minesPositions.includes(idx)) {
+      // Hit mine - lose
+      cell.classList.add('mine', 'revealed');
+      minesGameActive = false;
+      playSound(soundLose);
+      currentUser.balance -= minesBet;
+      updateBalance();
+      saveUsers();
+      updateMinesMsg(`BOOM! You hit a mine and lost R${minesBet.toLocaleString()}`, 'var(--danger)');
+      addFeedItem(currentUser.username, false, minesBet);
+      revealAllMines();
+      minesStartBtn.textContent = 'Start Game';
+      minesCashoutBtn.disabled = true;
+    } else {
+      // Safe cell
+      cell.classList.add('safe', 'revealed');
+      minesPayoutMultiplier += 0.3; // increase multiplier
+      playSound(soundWin);
+      const payout = Math.floor(minesBet * minesPayoutMultiplier);
+      updateMinesMsg(`Safe! Current payout: R${payout.toLocaleString()}`, 'var(--success)');
+      minesCashoutBtn.disabled = false;
+      
+      if(revealedCells.size === (MINES_GRID_SIZE*MINES_GRID_SIZE - minesCount)) {
+        // Win all safe spots revealed
+        cashOutMinesGame();
+      }
+    }
+  }
+
+  function cashOutMinesGame() {
+    if(!minesGameActive) return;
+    
+    const payout = Math.floor(minesBet * minesPayoutMultiplier);
+    minesGameActive = false;
+    currentUser.balance += payout;
+    updateBalance();
+    saveUsers();
+    updateMinesMsg(`You cashed out R${payout.toLocaleString()}!`, 'var(--success)');
+    addFeedItem(currentUser.username, true, payout);
+    minesStartBtn.textContent = 'Start Game';
+    minesCashoutBtn.disabled = true;
+    revealAllMines();
+  }
+
+  function revealAllMines() {
+    minesBoard.querySelectorAll('.mine-cell').forEach(cell => {
+      const idx = Number(cell.dataset.index);
+      if(minesPositions.includes(idx)) {
+        cell.classList.add('mine', 'revealed');
+      }
+    });
+  }
+
+  function startMinesGame() {
+    if(!currentUser) return;
+    const bet = parseInt(minesBetInput.value, 10);
+    let minesNum = parseInt(minesMinesCountInput.value, 10);
+    if(isNaN(bet) || bet <= 0) {
+      showPopup('Enter a valid bet amount (greater than 0)', 'error');
+      return;
+    }
+    if(bet > currentUser.balance) {
+      showPopup('Insufficient balance', 'error');
+      return;
+    }
+    if(isNaN(minesNum) || minesNum < 1) minesNum = 1;
+    if(minesNum > 5) minesNum = 5;
+    minesCount = minesNum;
+    minesBet = bet;
+
+    resetMinesGame();
+    generateMines();
+    createMinesBoard();
+    minesGameActive = true;
+    minesStartBtn.textContent = 'Restart Game';
+    updateMinesMsg(`Game started! Avoid the ${minesCount} mines.`, 'var(--accent)');
+    playSound(soundClick);
+  }
+
+  minesStartBtn.addEventListener('click', () => {
+    if(minesGameActive) {
+      // Restarting game resets it
+      resetMinesGame();
+      minesStartBtn.textContent = 'Start Game';
+      minesMsg.textContent = '';
+      minesBoard.innerHTML = '';
+      minesGameActive = false;
+    } else {
+      startMinesGame();
+    }
+  });
+
+  minesCashoutBtn.addEventListener('click', cashOutMinesGame);
+
+  // --- Horse Betting Game Logic ---
+  const horsesBetInput = document.getElementById('horses-bet');
+  const horsesHorseSelect = document.getElementById('horses-horse');
+  const horsesMsg = document.getElementById('horses-msg');
+  const horsesTrack = document.getElementById('horses-track');
+  const horseBetBtns = document.querySelectorAll('.horse-bet-btn');
+  const horses = document.querySelectorAll('.horse');
+
+  const horseMultipliers = {
+    1: 3,   // Red
+    2: 2.5, // Green
+    3: 2,   // Blue
+    4: 4,   // Yellow
+    5: 5    // Purple
+  };
+
+  let horseRaceActive = false;
+
+  function startHorseRace(bet, horseNum) {
+    if(!currentUser) return;
+    if(isNaN(bet) || bet <= 0) {
+      showPopup('Enter a valid bet amount (greater than 0)', 'error');
+      return;
+    }
+    if(bet > currentUser.balance) {
+      showPopup('Insufficient balance', 'error');
+      return;
+    }
+    
+    currentUser.balance -= bet;
+    updateBalance();
+    saveUsers();
+    
+    horseRaceActive = true;
+    horsesMsg.textContent = 'Race in progress...';
+    playSound(soundRace);
+    
+    // Reset horse positions
+    horses.forEach(horse => {
+      horse.style.left = '10px';
+    });
+    
+    // Disable all bet buttons during race
+    horseBetBtns.forEach(btn => {
+      btn.disabled = true;
+    });
+    
+    // Simulate race
+    const raceInterval = setInterval(() => {
+      if(!horseRaceActive) {
+        clearInterval(raceInterval);
+        return;
+      }
+      
+      let raceFinished = false;
+      let winner = null;
+      
+      horses.forEach(horse => {
+        if(!raceFinished) {
+          const currentPos = parseInt(horse.style.left) || 10;
+          const speed = getRandomInt(1, 5);
+          const newPos = Math.min(currentPos + speed, horsesTrack.offsetWidth - 50);
+          
+          horse.style.left = `${newPos}px`;
+          
+          if(newPos >= horsesTrack.offsetWidth - 50) {
+            raceFinished = true;
+            winner = horse.dataset.num;
+            horseRaceActive = false;
+          }
+        }
+      });
+      
+      if(raceFinished) {
+        clearInterval(raceInterval);
+        finishHorseRace(bet, horseNum, winner);
+      }
+    }, 100);
+  }
+
+  function finishHorseRace(bet, selectedHorse, winnerHorse) {
+    let won = false;
+    let payout = 0;
+    
+    if(selectedHorse == winnerHorse) {
+      won = true;
+      payout = Math.floor(bet * horseMultipliers[selectedHorse]);
+      currentUser.balance += payout;
+      updateBalance();
+      saveUsers();
+      playSound(soundWin);
+      horsesMsg.textContent = `Your horse won! You won R${payout.toLocaleString()}!`;
+    } else {
+      playSound(soundLose);
+      horsesMsg.textContent = `Your horse lost! The winner was horse ${winnerHorse}.`;
+    }
+    
+    addFeedItem(currentUser.username, won, won ? payout : bet);
+    
+    // Re-enable bet buttons
+    horseBetBtns.forEach(btn => {
+      btn.disabled = false;
+    });
+  }
+
+  horseBetBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const bet = parseInt(horsesBetInput.value, 10);
+      const horseNum = btn.dataset.horse;
+      startHorseRace(bet, horseNum);
+    });
+  });
+
+  // Update select when clicking direct bet buttons
+  horseBetBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      horsesHorseSelect.value = btn.dataset.horse;
+    });
+  });
+
+  // --- Wheel Spin Game Logic ---
+  const wheelBetInput = document.getElementById('wheel-bet');
+  const wheelSegmentSelect = document.getElementById('wheel-segment');
+  const wheelMsg = document.getElementById('wheel-msg');
+  const wheelSpinner = document.getElementById('wheel-spinner');
+  const wheelSpinBtn = document.getElementById('wheel-spin-btn');
+
+  const wheelMultipliers = {
+    1: 6, // Red
+    2: 5, // Green
+    3: 4, // Blue
+    4: 3, // Yellow
+    5: 2, // Purple
+    6: 8  // Orange
+  };
+
+  let wheelSpinning = false;
+
+  function spinWheel(bet, selectedSegment) {
+    if(!currentUser) return;
+    if(isNaN(bet) || bet <= 0) {
+      showPopup('Enter a valid bet amount (greater than 0)', 'error');
+      return;
+    }
+    if(bet > currentUser.balance) {
+      showPopup('Insufficient balance', 'error');
+      return;
+    }
+    
+    currentUser.balance -= bet;
+    updateBalance();
+    saveUsers();
+    
+    wheelSpinning = true;
+    wheelSpinBtn.disabled = true;
+    wheelMsg.textContent = 'Spinning...';
+    playSound(soundWheel);
+    
+    // Random spin (between 2-5 full rotations plus segment offset)
+    const spinDegrees = 1080 + (getRandomInt(0, 5) * 60); // 6 segments * 60deg each
+    wheelSpinner.style.transform = `rotate(${spinDegrees}deg)`;
+    
+    setTimeout(() => {
+      wheelSpinning = false;
+      const winningSegment = (Math.floor(spinDegrees / 60) % 6) + 1; // 1-6
+      finishWheelSpin(bet, selectedSegment, winningSegment);
+    }, 4000);
+  }
+
+  function finishWheelSpin(bet, selectedSegment, winningSegment) {
+    let won = false;
+    let payout = 0;
+    
+    if(selectedSegment == winningSegment) {
+      won = true;
+      payout = Math.floor(bet * wheelMultipliers[winningSegment]);
+      currentUser.balance += payout;
+      updateBalance();
+      saveUsers();
+      playSound(soundWin);
+      wheelMsg.textContent = `You won! R${payout.toLocaleString()} (${wheelMultipliers[winningSegment]}x)`;
+    } else {
+      playSound(soundLose);
+      wheelMsg.textContent = `You lost! The wheel landed on segment ${winningSegment}.`;
+    }
+    
+    addFeedItem(currentUser.username, won, won ? payout : bet);
+    wheelSpinBtn.disabled = false;
+  }
+
+  wheelSpinBtn.addEventListener('click', () => {
+    const bet = parseInt(wheelBetInput.value, 10);
+    const segment = wheelSegmentSelect.value;
+    spinWheel(bet, segment);
+  });
+
+  // Init app
+  function init() {
+    loadUsers();
+    loadSession();
+    if(currentUser) {
+      showMainScreen();
+    } else {
+      showLoginScreen();
+    }
+  }
+  init();
+})();
+</script>
+</body>
+</html>
